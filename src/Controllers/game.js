@@ -48,14 +48,44 @@ const GetGame = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+const GetGames=async(req,res)=>{
+  try {
+      const game=await gameStrc.find() ;
+      res.status(200).json({
+          result: game
+      })
+  } catch (error) {
+      res.status(500).send("internal server error");
+      console.log("internal server error",error);
+  }
+}
+const updateGame= async (req, res) => {
+  try {
+    const GameId = req.params.id;
+    const inputValidation = gameJoiSchema.validate(req.body);
+    if (inputValidation.error) return reportJoiError(inputValidation, res);
+    const newGame = await gameStrc.update(req.body, {
+      where: { id: GameId },
+    });
+
+    if (newGame) {
+      res.status(200).json({
+        message: "you have succesfully updated game",
+        result: req.body,
+      });
+    } else {
+      res.status(404).send("source not found or no changes made");
+    }
+  } catch (error) {
+    console.log("internal server error", error);
+  }
+};
 const DeleteGame = async (req, res) => {
   try {
     const gameId = req.params.id;
-    const game = await gameStrc.findOne({ where: { _id: gameId } });
+    const game = await gameStrc.findOneAndDelete(gameId);
 
     if (game) {
-      // Assuming gameStrc.destroy is the method to delete a record
-      await gameStrc.destroy({ where: { id: gameId } });
       res.status(200).json({ message: "Game deleted successfully" });
     } else {
       res.status(404).json({ message: "Game not found" });
@@ -66,4 +96,4 @@ const DeleteGame = async (req, res) => {
   }
 };
 
-export { CreateGame, GetGame, DeleteGame };
+export { CreateGame, GetGame, DeleteGame,GetGames,updateGame };
