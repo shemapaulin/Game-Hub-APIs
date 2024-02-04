@@ -7,14 +7,10 @@ const CreateGame = async (req, res) => {
     const inputValidation = gameJoiSchema.validate(req.body);
     if (inputValidation.error) return reportJoiError(inputValidation, res);
 
-    //const { gameName, platform, ratings } = req.body;
-    //const myObject = [req.body.gameName, req.body.platform, req.body.ratings];
-
     const game = await gameStrc.create(req.body);
-    console.log(req.body);
     if (game) {
       res.status(200).json({
-        result: req.body,
+        result: game,
         message: "Game Created Successfully",
       });
     } else {
@@ -37,38 +33,37 @@ const CreateGame = async (req, res) => {
   }
 };
 
+const GetGame = async (req, res) => {
+  try {
+    const gameId = req.params.id;
+    const game = await gameStrc.findById(gameId);
 
-const GetGame=async(req,res)=>{
-    try {
-        const gameId = req.params.id;
-        const game = await gameStrc.findOne({ where: { id: gameId } });
-    
-        if (game) {
-          res.status(200).json({ result: game});
-        } else {
-          res.status(404).json({ message: "name not found" });
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        res.status(500).json({ message: "Internal server error" });
-      }
-}
-const DeleteGame=async(req,res)=>{
-    try {
-        const gameId = req.params.id;
-        const game = await gameStrc.findOne({ where: { id: gameId } });
-
-        if (game) {
-            // Assuming gameStrc.destroy is the method to delete a record
-            await gameStrc.destroy({ where: { id: gameId } });
-            res.status(200).json({ message: "Game deleted successfully" });
-        } else {
-            res.status(404).json({ message: "Game not found" });
-        }
-    } catch (error) {
-        console.error("Error deleting data:", error);
-        res.status(500).json({ message: "Internal server error" });
+    if (game) {
+      res.status(200).json({ result: game });
+    } else {
+      res.status(404).json({ message: "game not found" });
     }
-}
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+const DeleteGame = async (req, res) => {
+  try {
+    const gameId = req.params.id;
+    const game = await gameStrc.findOne({ where: { _id: gameId } });
 
-export { CreateGame,GetGame,DeleteGame};
+    if (game) {
+      // Assuming gameStrc.destroy is the method to delete a record
+      await gameStrc.destroy({ where: { id: gameId } });
+      res.status(200).json({ message: "Game deleted successfully" });
+    } else {
+      res.status(404).json({ message: "Game not found" });
+    }
+  } catch (error) {
+    console.error("Error deleting data:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export { CreateGame, GetGame, DeleteGame };
